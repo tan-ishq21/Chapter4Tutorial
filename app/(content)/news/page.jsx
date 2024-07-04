@@ -1,55 +1,28 @@
-'use client';
 import Link from 'next/link'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 
-const NewsPage = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState();
-  const [news, setNews] = useState();
-  useEffect(() => {
-    async function fetchNews(){
-      setIsLoading(true);
-      const response = await fetch('http://localhost:8080/news');
-      if(!response.ok){
-        setError('Failed to fetch');
-        setIsLoading(false);
-      }
-      setIsLoading(false);
-      const news = await response.json();
-      setNews(news);
-    }
-    fetchNews();
-  }, []);
+export default async function NewsPage () {
 
-  if(isLoading){
-    return <p>Loading....</p>
+  const response = await fetch('http://localhost:8080/news');
+  if(!response.ok){
+    throw new Error('Failed to Fetch News');
   }
-
-  if(error){
-    return <p>{error}</p>
-  }
-
-  let newsContent;
-  if(news){
-    newsContent = 
-    <ul className='news-list'>
-      {news.map((newsItem) => (
-          <li key={newsItem.id}>
-              <Link href={`/news/${newsItem.slug}`}>
-                  <img src={`/images/news/${newsItem.image}`} alt="NewsItem Image" />
-                  <span>{newsItem.title}</span>
-              </Link>
-          </li>
-      ))}
-    </ul>
-  }
+  const news = await response.json();
 
   return (
     <div>
         <h1>NEWS PAGE</h1>
-        {newsContent}
+        <ul className='news-list'>
+          {news.map((newsItem) => (
+              <li key={newsItem.id}>
+                  <Link href={`/news/${newsItem.slug}`}>
+                      <img src={`/images/news/${newsItem.image}`} alt="NewsItem Image" />
+                      <span>{newsItem.title}</span>
+                  </Link>
+              </li>
+          ))}
+        </ul>
     </div>
   )
 }
 
-export default NewsPage
