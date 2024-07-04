@@ -135,7 +135,7 @@ ul {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
+  width: 90%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.85);
   display: flex;
@@ -143,10 +143,14 @@ ul {
   align-items: center;
 }
 
-.news-article img {
+.news-article img{
   width: 7rem;
   margin-bottom: 1rem;
   border-radius: 4px;
+}
+
+.fullscreen-image img {
+  max-width: 80%;
 }
 
 .modal {
@@ -155,7 +159,7 @@ ul {
   border-radius: 4px;
   border: none;
   box-shadow: 0 0 10px 0 #181817;
-  max-width: 50rem;
+  max-width: 45rem;
   width: 100%;
 }
 
