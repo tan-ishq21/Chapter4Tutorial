@@ -1,22 +1,43 @@
 import { getAvailableNewsMonths, getAvailableNewsYears, getNewsForYear, getNewsForYearAndMonth } from '@/lib/news';
 import Link from 'next/link';
-import React from 'react'
+import React, { Suspense } from 'react'
 
-const DynamicArchivePage = ({ params }) => {
-    const filter = params.filter;
-
-    const selctedYear = filter?.[0];
-    const selectedMonth = filter?.[1];
-
-    let news;
-    let links = getAvailableNewsYears();
-    if (selctedYear && !selectedMonth) {
-        news = getNewsForYear(selctedYear);
-        links = getAvailableNewsMonths(selctedYear);
+async function FilterHeader({year,month}){
+    const availableYears = await getAvailableNewsYears();
+    let links = availableYears;
+    if((year && !availableYears.includes(year)) || (month && !getAvailableNewsMonths(year).includes(month))){
+        throw new Error("Invalid Filter");
     }
-    if(selctedYear && selectedMonth){
-        news = getNewsForYearAndMonth(selctedYear,selectedMonth);
+    if (year && !month) {
+        links = getAvailableNewsMonths(year);
+    }
+    if(year && month){
         links = [];
+    }
+    return (
+        <header id='archive-header'>
+            <nav>
+                <ul>
+                    {links.map((link) => {
+                        const href = year ? `/archive/${year}/${link}` : `/archive/${link}`
+                        return (
+                        <li key={link}>
+                            <Link href={href} >{link}</Link>
+                        </li>
+                        )
+                    })}
+                </ul>
+            </nav>
+        </header>
+    )
+}
+async function FilteresNews({year,month}){
+    let news;
+    if(year && !month){
+        news = await getNewsForYear(year);
+    }
+    else if(year && month){
+        news = await getNewsForYearAndMonth(year,month)
     }
     let newsContent = <p>No News Found for the selected period</p>
 
@@ -32,31 +53,23 @@ const DynamicArchivePage = ({ params }) => {
             ))}
         </ul>
     }
+    return newsContent;
+}
+export default async function DynamicArchivePage ({ params }) {
+    const filter = params.filter;
 
-    console.log(filter);
-   
-    if((selctedYear && !getAvailableNewsYears().includes(+selctedYear)) || (selectedMonth && !getAvailableNewsMonths(selctedYear).includes(+selectedMonth))){
-        throw new Error("Invalid Filter");
-    }
+    const selctedYear = filter?.[0];
+    const selectedMonth = filter?.[1];
+    
     return (
         <>
-        <header id='archive-header'>
-            <nav>
-                <ul>
-                    {links.map((link) => {
-                        const href = selctedYear ? `/archive/${selctedYear}/${link}` : `/archive/${link}`
-                        return (
-                        <li key={link}>
-                            <Link href={href} >{link}</Link>
-                        </li>
-                        )
-                    })}
-                </ul>
-            </nav>
-        </header>
-        {newsContent}
+        <Suspense fallback={<p>Loading Filter....</p>}>
+            <FilterHeader year={selctedYear} month={selectedMonth} />
+        </Suspense>
+        <Suspense fallback={<p>Loading News...</p>}>
+            <FilteresNews year={selctedYear} month={selectedMonth} />
+        </Suspense>
         </>
     )
 }
 
-export default DynamicArchivePage

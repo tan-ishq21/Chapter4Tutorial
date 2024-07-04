@@ -2,8 +2,8 @@ import { getLatestNews } from '@/lib/news'
 import Link from 'next/link';
 import React from 'react'
 
-const LatestPage = () => {
-    const news = getLatestNews();
+export default async function LatestPage () {
+    const news = await getLatestNews();
   return (
     <>
     <h1>Latest News</h1>
@@ -21,4 +21,3 @@ const LatestPage = () => {
   )
 }
 
-export default LatestPage
